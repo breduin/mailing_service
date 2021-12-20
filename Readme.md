@@ -9,6 +9,7 @@
 - [dj-database-url](https://pypi.org/project/dj-database-url/) - для компактной записи данных для подключения к БД в виде URL (см. ниже образец файла .env);
 - [whitenoise](http://whitenoise.evans.io/en/stable/) - упрощение работы со статикой;
 - [Debug-toolbar](https://pypi.org/project/django-debug-toolbar/) - отладка, мониторинг запросов к БД; 
+- [Django-Jazzmin](https://django-jazzmin.readthedocs.io/) - тема для административной части сайта с дополнительным фунционалом;
 
 ## Настройки
 Настройки для часовой зоны Мск.
