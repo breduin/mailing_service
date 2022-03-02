@@ -29,6 +29,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'accounts.apps.AccountsConfig',
+    'phonenumber_field',
+    'phonenumbers',
+    'mailings',
+    'rest_framework',
+    'django_rq',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +129,67 @@ if DEBUG:
 # EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
 # EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
 # DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL')
+
+PHONENUMBER_DEFAULT_REGION = 'RU'
+PHONENUMBER_DB_FORMAT = 'NATIONAL'
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'PASSWORD': 'some-password',
+        'DEFAULT_TIMEOUT': 360,
+    },
+    'with-sentinel': {
+        'SENTINELS': [('localhost', 26736), ('localhost', 26737)],
+        'MASTER_NAME': 'redismaster',
+        'DB': 0,
+        'PASSWORD': 'secret',
+        'SOCKET_TIMEOUT': None,
+        'CONNECTION_KWARGS': {
+            'socket_connect_timeout': 0.3
+        },
+    },
+    'high': {
+        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    },
+    'low': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/debug.log',
+            'formatter': 'verbose'
+        },
+    },
+    'root': {
+        'handlers': [ 'debug'],
+        'level': 'WARNING',
+    },
+}
