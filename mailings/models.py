@@ -43,7 +43,11 @@ class Client(models.Model):
         ('UTC+3', 'Europe/Moscow'),
     ]
 
-    phonenumber = PhoneNumberField('Телефон заказчика', db_index=True)
+    phonenumber = PhoneNumberField(
+        'Телефон заказчика',
+        db_index=True,
+        unique=True,
+        )
 
     # данное поле может заполняться автоматически путем парсинга тел. номера
     # FIXME вывод поля оставлен в соответствии с ТЗ, лучше сделать
