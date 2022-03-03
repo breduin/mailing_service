@@ -14,16 +14,21 @@ class Mailing(models.Model):
         'Коды операторов',
         max_length=512,
         blank=True,
-        help_text='''укажите коды операторов для рассылки через 
+        help_text='''укажите коды операторов для рассылки через
         запятую или оставьте поле пустым для рассылки на все номера'''
         )
     tags = models.CharField(
         'Тэги',
         max_length=512,
         blank=True,
-        help_text='''укажите тэги клиентов для рассылки через 
+        help_text='''укажите тэги клиентов для рассылки через
         запятую или оставьте поле пустым для рассылки всем клиентам'''
-        )        
+        )
+    is_active = models.BooleanField(
+        'Активная?',
+        default=True,
+        help_text='укажите, является ли рассылка активной'
+        )
 
     class Meta:
         verbose_name = 'Рассылка'
@@ -41,7 +46,7 @@ class Client(models.Model):
     phonenumber = PhoneNumberField('Телефон заказчика', db_index=True)
 
     # данное поле может заполняться автоматически путем парсинга тел. номера
-    # FIXME вывод поля оставлен в соответствии с ТЗ, лучше сделать 
+    # FIXME вывод поля оставлен в соответствии с ТЗ, лучше сделать
     # editable=False, нужно решение заказчика.
     mobile_code = models.PositiveSmallIntegerField(
         'Код оператора мобильной связи',
@@ -73,7 +78,7 @@ class Client(models.Model):
             phone = str(phonenumbers.parse(str(self.phonenumber), None).national_number)
             self.mobile_code = int(phone[:3])
         super().save(*args, **kwargs)
-  
+
 
 class Message(models.Model):
     sent_at = models.DateTimeField(
@@ -91,6 +96,7 @@ class Message(models.Model):
         Mailing,
         verbose_name='Рассылка',
         on_delete=models.CASCADE,
+        related_name='messages',
         )
     client = models.ForeignKey(
         Client,

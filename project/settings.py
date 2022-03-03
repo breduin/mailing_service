@@ -1,8 +1,9 @@
-"""Django settings for the project."""
+'''Django settings for the project.'''
 import dj_database_url
 from environs import Env
 import os
 from pathlib import Path
+import rq
 
 
 env = Env()
@@ -31,7 +32,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'phonenumber_field',
     'phonenumbers',
-    'mailings',
+    'mailings.apps.MailingsConfig',
     'rest_framework',
     'django_rq',
 ]
@@ -70,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
-DATABASES = {"default": env.dj_db_url("DB_URL")}
+DATABASES = {'default': env.dj_db_url('DB_URL')}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -137,22 +138,22 @@ RQ_QUEUES = {
     'default': {
         'HOST': 'localhost',
         'PORT': 6379,
+        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379'),
         'DB': 0,
-        'PASSWORD': 'some-password',
-        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_TIMEOUT': 480,
     },
     'with-sentinel': {
         'SENTINELS': [('localhost', 26736), ('localhost', 26737)],
         'MASTER_NAME': 'redismaster',
         'DB': 0,
-        'PASSWORD': 'secret',
+        'PASSWORD': '',
         'SOCKET_TIMEOUT': None,
         'CONNECTION_KWARGS': {
             'socket_connect_timeout': 0.3
         },
     },
     'high': {
-        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'URL': os.getenv('REDISTOGO_URL', 'redis://localhost:6379/0'),
         'DEFAULT_TIMEOUT': 500,
     },
     'low': {
@@ -175,6 +176,10 @@ LOGGING = {
             'format': '{levelname} {module} {message}',
             'style': '{',
         },
+        'rq_console': {
+            'format': '%(asctime)s %(message)s',
+            'datefmt': '%H:%M:%S',
+        },        
     },
     'handlers': {
         'console': {
@@ -187,9 +192,21 @@ LOGGING = {
             'filename': 'logs/debug.log',
             'formatter': 'verbose'
         },
+        'rq_console': {
+            'level': 'DEBUG',
+            'class': 'rq.utils.ColorizingStreamHandler',
+            'formatter': 'rq_console',
+            'exclude': ['%(asctime)s'],
+        },
     },
     'root': {
         'handlers': [ 'debug'],
         'level': 'WARNING',
     },
+    'loggers': {
+        'rq.worker': {
+            'handlers': ['rq_console'],
+            'level': 'DEBUG'
+        },
+    }    
 }
